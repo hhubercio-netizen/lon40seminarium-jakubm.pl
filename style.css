@@ -15,10 +15,13 @@ h1 {
     display: grid;
     grid-template-columns: 1fr;
     gap: 20px;
-    padding: 20px;
+    padding: 40px;
     max-width: 500px;
-    margin: 0 auto;
+    margin: 40px auto;
+    background-color: white; 
+    border-radius: 20px;
 }
+
 
 .foto{
     display: block;
@@ -39,4 +42,3 @@ a{
     background-color: rgb(154, 154, 154);
     border-radius: 5px;
 }
-
