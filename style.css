@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: rgba(200, 220, 167, 0.15);
+    background: rgba(250, 220, 50,);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
