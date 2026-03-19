@@ -6,52 +6,87 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
             background: #f0f0f0;
+            padding: 20px;
         }
         h1 {
             text-align: center;
         }
         .calc {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 400px;
             margin: 0 auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        input, select, button {
-            margin: 5px 0;
+        .box {
+            background: #fff;
+            border: 2px solid #555;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 80px;
+            font-size: 18px;
             padding: 5px;
-            width: 100%;
-            font-size: 16px;
+            margin: 5px;
+            text-align: center;
+        }
+        select {
+            font-size: 18px;
+            padding: 5px;
+            margin: 5px;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px;
+            margin-top: 5px;
+            cursor: pointer;
         }
         .result {
-            margin-top: 10px;
             font-weight: bold;
-            text-align: center;
+            font-size: 20px;
+            color: #333;
+        }
+        .fraction-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
     <h1>Kalkulator Ułamków</h1>
     <div class="calc">
-        <input type="number" id="licznik1" placeholder="Licznik 1">
-        <input type="number" id="mianownik1" placeholder="Mianownik 1">
-        <select id="operator">
-            <option value="+">Dodaj</option>
-            <option value="-">Odejmij</option>
-            <option value="*">Pomnóż</option>
-            <option value="/">Podziel</option>
-        </select>
-        <input type="number" id="licznik2" placeholder="Licznik 2">
-        <input type="number" id="mianownik2" placeholder="Mianownik 2">
-        <button onclick="oblicz()">Oblicz</button>
-        <div class="result" id="wynik"></div>
+        <div class="box fraction-box">
+            <div>
+                <input type="number" id="licznik1" placeholder="Licznik 1"><br>
+                <input type="number" id="mianownik1" placeholder="Mianownik 1">
+            </div>
+            <select id="operator">
+                <option value="+">+</option>
+                <option value="-">-</option>
+                <option value="*">*</option>
+                <option value="/">/</option>
+            </select>
+            <div>
+                <input type="number" id="licznik2" placeholder="Licznik 2"><br>
+                <input type="number" id="mianownik2" placeholder="Mianownik 2">
+            </div>
+        </div>
+        <div class="box">
+            <button onclick="oblicz()">Oblicz</button>
+        </div>
+        <div class="box result" id="wynik">
+            Wynik pojawi się tutaj
+        </div>
     </div>
 
     <script>
-        // Funkcja do skracania ułamków
         function skroc(licznik, mianownik) {
             function nwd(a, b) {
                 return b === 0 ? a : nwd(b, a % b);
@@ -97,11 +132,9 @@
                     break;
             }
 
-            // Skracanie wyniku
             [wynikLicznik, wynikMianownik] = skroc(wynikLicznik, wynikMianownik);
 
-            document.getElementById("wynik").innerText = 
-                `Wynik: ${wynikLicznik}/${wynikMianownik}`;
+            document.getElementById("wynik").innerText = `${wynikLicznik} / ${wynikMianownik}`;
         }
     </script>
 </body>
