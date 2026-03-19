@@ -15,23 +15,32 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-top:40px;
+  margin:60px auto;
 }
 
 .przewod{
-  width:120px;
+  width:80px;
   height:6px;
   background:#777;
 }
 
 .korpus{
-  width:340px;
+  width:360px;
   height:70px;
   background:#e6d3a3;
   border-radius:12px;
   display:flex;
-  justify-content:space-evenly;
   align-items:center;
+  padding:0 10px;
+}
+
+.korpus .cyfry{
+  display:flex;
+  gap:10px; /* odstęp między cyframi */
+}
+
+.korpus .mnoznik, .korpus .tolerancja{
+  margin-left:20px; /* większy odstęp od cyfr */
 }
 
 .pasek{
@@ -41,9 +50,9 @@ body{
   cursor:pointer;
 }
 
-#wynik{
-  margin-top:30px;
-  font-size:22px;
+#wynik5, #wynik4{
+  margin-top:20px;
+  font-size:20px;
   font-weight:bold;
 }
 
@@ -64,26 +73,40 @@ select{
 <div class="rezystor" id="rezystor5">
   <div class="przewod"></div>
   <div class="korpus">
-    <div class="pasek"></div>
-    <div class="pasek"></div>
-    <div class="pasek"></div>
-    <div class="pasek"></div>
-    <div class="pasek"></div>
+    <div class="cyfry">
+      <div class="pasek"></div>
+      <div class="pasek"></div>
+      <div class="pasek"></div>
+    </div>
+    <div class="mnoznik">
+      <div class="pasek"></div>
+    </div>
+    <div class="tolerancja">
+      <div class="pasek"></div>
+    </div>
   </div>
   <div class="przewod"></div>
 </div>
+<div id="wynik5">Rezystancja 5-paskowego: -</div>
 
 <!-- REZYSTOR 4-PASKOWY -->
 <div class="rezystor" id="rezystor4">
   <div class="przewod"></div>
   <div class="korpus">
-    <div class="pasek"></div>
-    <div class="pasek"></div>
-    <div class="pasek"></div>
-    <div class="pasek"></div>
+    <div class="cyfry">
+      <div class="pasek"></div>
+      <div class="pasek"></div>
+    </div>
+    <div class="mnoznik">
+      <div class="pasek"></div>
+    </div>
+    <div class="tolerancja">
+      <div class="pasek"></div>
+    </div>
   </div>
   <div class="przewod"></div>
 </div>
+<div id="wynik4">Rezystancja 4-paskowego: -</div>
 
 <select id="menuKolorow">
   <option value="#000000">Czarny</option>
@@ -100,8 +123,6 @@ select{
   <option value="#C0C0C0">Srebrny</option>
 </select>
 
-<div id="wynik">Rezystancja: -</div>
-
 <script>
 const cyfry = {
   "#000000":0, "#8b4513":1, "#ff0000":2, "#ffa500":3, "#ffff00":4,
@@ -113,18 +134,22 @@ const mnozniki = {
   "#008000":100000, "#0000ff":1000000, "#ffd700":0.1, "#c0c0c0":0.01
 };
 
+// 4 paski tolerancji: brąz ±1%, czerwony ±2%, złoty ±5%, srebrny ±10%
 const tolerancje = {
-  "#8b4513":"±1%", "#ff0000":"±2%", "#008000":"±0.5%", "#0000ff":"±0.25%",
-  "#800080":"±0.1%", "#808080":"±0.05%", "#ffd700":"±5%", "#c0c0c0":"±10%"
+  "#8b4513":"±1%", "#ff0000":"±2%", "#ffd700":"±5%", "#c0c0c0":"±10%"
 };
 
 let aktywnyPasek = null;
 const menu = document.getElementById("menuKolorow");
 
 // Funkcja do inicjalizacji pasków dla dowolnego rezystora
-function initRezystor(rezystorId, typ="5") {
-  const paski = document.querySelectorAll(`#${rezystorId} .pasek`);
-  paski.forEach(pasek=>{
+function initRezystor(rezystorId, typ="5", wynikId){
+  const cyfryPaski = document.querySelectorAll(`#${rezystorId} .cyfry .pasek`);
+  const mnoznikPaski = document.querySelectorAll(`#${rezystorId} .mnoznik .pasek`);
+  const tolerancjaPaski = document.querySelectorAll(`#${rezystorId} .tolerancja .pasek`);
+  const wszystkiePaski = [...cyfryPaski, ...mnoznikPaski, ...tolerancjaPaski];
+
+  wszystkiePaski.forEach(pasek=>{
     pasek.style.background="#000000";
     pasek.addEventListener("click",(e)=>{
       aktywnyPasek=pasek;
@@ -137,21 +162,21 @@ function initRezystor(rezystorId, typ="5") {
   function oblicz() {
     let wartosc, tolerancjaStr="";
     if(typ==="5") {
-      const b1=cyfry[hex(paski[0].style.background)] || 0;
-      const b2=cyfry[hex(paski[1].style.background)] || 0;
-      const b3=cyfry[hex(paski[2].style.background)] || 0;
-      const mnoznik=mnozniki[hex(paski[3].style.background)] || 1;
-      tolerancjaStr = tolerancje[hex(paski[4].style.background)] || "";
+      const b1=cyfry[hex(cyfryPaski[0].style.background)] || 0;
+      const b2=cyfry[hex(cyfryPaski[1].style.background)] || 0;
+      const b3=cyfry[hex(cyfryPaski[2].style.background)] || 0;
+      const mnoznik=mnozniki[hex(mnoznikPaski[0].style.background)] || 1;
+      tolerancjaStr = tolerancje[hex(tolerancjaPaski[0].style.background)] || "";
       wartosc = ((b1*100)+(b2*10)+b3)*mnoznik;
     } else { // 4 paski
-      const b1=cyfry[hex(paski[0].style.background)] || 0;
-      const b2=cyfry[hex(paski[1].style.background)] || 0;
-      const mnoznik=mnozniki[hex(paski[2].style.background)] || 1;
-      tolerancjaStr = tolerancje[hex(paski[3].style.background)] || "";
+      const b1=cyfry[hex(cyfryPaski[0].style.background)] || 0;
+      const b2=cyfry[hex(cyfryPaski[1].style.background)] || 0;
+      const mnoznik=mnozniki[hex(mnoznikPaski[0].style.background)] || 1;
+      tolerancjaStr = tolerancje[hex(tolerancjaPaski[0].style.background)] || "";
       wartosc = (b1*10 + b2)*mnoznik;
     }
-    document.getElementById("wynik").innerText =
-      `Rezystancja: ${wartosc} Ω ${tolerancjaStr}`;
+    document.getElementById(wynikId).innerText =
+      `Rezystancja ${typ}-paskowego: ${wartosc} Ω ${tolerancjaStr}`;
   }
 
   menu.addEventListener("change", ()=>{
@@ -171,10 +196,9 @@ function hex(rgb){
   return "#"+((1<<24)+(parseInt(r[0])<<16)+(parseInt(r[1])<<8)+parseInt(r[2])).toString(16).slice(1);
 }
 
-// Inicjalizacja obu rezystorów
-initRezystor("rezystor5","5");
-initRezystor("rezystor4","4");
-
+// Inicjalizacja obu rezystorów z własnymi wynikami
+initRezystor("rezystor5","5","wynik5");
+initRezystor("rezystor4","4","wynik4");
 </script>
 
 </body>
