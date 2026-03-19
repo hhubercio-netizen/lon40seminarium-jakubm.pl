@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Kalkulator rezystora 4- i 5-paskowego</title>
+<title>Kalkulator rezystora</title>
 
 <style>
 body{
@@ -38,16 +38,16 @@ body{
   align-items:center;
 }
 
-.korpus .cyfry{
+.cyfry{
   display:flex;
   gap:50px;
 }
 
-.korpus .mnoznik{
+.mnoznik{
   margin-left:80px;
 }
 
-.korpus .tolerancja{
+.tolerancja{
   margin-left:80px;
 }
 
@@ -79,10 +79,9 @@ select{
 
 <body>
 
-<h2>Kalkulator kodu paskowego rezystora</h2>
-<p>Kliknij pasek aby wybrać kolor</p>
+<h2>Kalkulator rezystora</h2>
+<p>Kliknij pasek</p>
 
-<!-- 5 pasków -->
 <div class="rezystor-container">
   <img src="zdjecia/zdjecierez5pas.png">
   <div class="rezystor" id="rezystor5">
@@ -93,19 +92,14 @@ select{
         <div class="pasek"></div>
         <div class="pasek"></div>
       </div>
-      <div class="mnoznik">
-        <div class="pasek"></div>
-      </div>
-      <div class="tolerancja">
-        <div class="pasek"></div>
-      </div>
+      <div class="mnoznik"><div class="pasek"></div></div>
+      <div class="tolerancja"><div class="pasek"></div></div>
     </div>
     <div class="przewod"></div>
   </div>
-  <div id="wynik5">Rezystancja 5-paskowego: -</div>
+  <div id="wynik5">-</div>
 </div>
 
-<!-- 4 paski -->
 <div class="rezystor-container">
   <img src="zdjecia/zdjecierez4pas.png">
   <div class="rezystor" id="rezystor4">
@@ -115,164 +109,131 @@ select{
         <div class="pasek"></div>
         <div class="pasek"></div>
       </div>
-      <div class="mnoznik">
-        <div class="pasek"></div>
-      </div>
-      <div class="tolerancja">
-        <div class="pasek"></div>
-      </div>
+      <div class="mnoznik"><div class="pasek"></div></div>
+      <div class="tolerancja"><div class="pasek"></div></div>
     </div>
     <div class="przewod"></div>
   </div>
-  <div id="wynik4">Rezystancja 4-paskowego: -</div>
+  <div id="wynik4">-</div>
 </div>
 
 <select id="menuKolorow"></select>
 
 <script>
+// --- dane ---
 const cyfry = {
-  "#000000":0, "#8b4513":1, "#ff0000":2, "#ffa500":3, "#ffff00":4,
-  "#008000":5, "#0000ff":6, "#800080":7, "#808080":8, "#ffffff":9
+  "#000000":0,"#8b4513":1,"#ff0000":2,"#ffa500":3,"#ffff00":4,
+  "#008000":5,"#0000ff":6,"#800080":7,"#808080":8,"#ffffff":9
 };
 
 const mnozniki = {
-  "#000000":1, "#8b4513":10, "#ff0000":100, "#ffa500":1000, "#ffff00":10000,
-  "#008000":100000, "#0000ff":1000000, "#ffd700":0.1, "#c0c0c0":0.01
+  "#000000":1,"#8b4513":10,"#ff0000":100,"#ffa500":1000,"#ffff00":10000,
+  "#008000":100000,"#0000ff":1000000,"#ffd700":0.1,"#c0c0c0":0.01
 };
 
 const tolerancje = {
-  "#8b4513":"±1%", "#ff0000":"±2%", "#ffd700":"±5%", "#c0c0c0":"±10%"
+  "#8b4513":"±1%","#ff0000":"±2%","#ffd700":"±5%","#c0c0c0":"±10%"
 };
 
-// wszystkie kolory
 const wszystkieKolory = [
-  ["#000000","Czarny"],
-  ["#8B4513","Brązowy"],
-  ["#FF0000","Czerwony"],
-  ["#FFA500","Pomarańczowy"],
-  ["#FFFF00","Żółty"],
-  ["#008000","Zielony"],
-  ["#0000FF","Niebieski"],
-  ["#800080","Fioletowy"],
-  ["#808080","Szary"],
-  ["#FFFFFF","Biały"],
-  ["#FFD700","Złoty"],
-  ["#C0C0C0","Srebrny"]
+  ["#000000","Czarny"],["#8B4513","Brązowy"],["#FF0000","Czerwony"],
+  ["#FFA500","Pomarańczowy"],["#FFFF00","Żółty"],["#008000","Zielony"],
+  ["#0000FF","Niebieski"],["#800080","Fioletowy"],["#808080","Szary"],
+  ["#FFFFFF","Biały"],["#FFD700","Złoty"],["#C0C0C0","Srebrny"]
 ];
 
-// tylko tolerancje
 const koloryTolerancji = [
-  ["#8B4513","Brązowy"],
-  ["#FF0000","Czerwony"],
-  ["#FFD700","Złoty"],
-  ["#C0C0C0","Srebrny"]
+  ["#8B4513","Brązowy"],["#FF0000","Czerwony"],
+  ["#FFD700","Złoty"],["#C0C0C0","Srebrny"]
 ];
 
 let aktywnyPasek = null;
-let trybTolerancji = false;
+let aktualnaFunkcjaOblicz = null;
 const menu = document.getElementById("menuKolorow");
 
+// --- helpery ---
 function ustawMenu(lista){
   menu.innerHTML="";
   lista.forEach(k=>{
-    const opt=document.createElement("option");
-    opt.value=k[0];
-    opt.textContent=k[1];
-    menu.appendChild(opt);
+    const o=document.createElement("option");
+    o.value=k[0];
+    o.textContent=k[1];
+    menu.appendChild(o);
   });
 }
 
-function formatujOhmy(ohmy){
-  if(ohmy >= 1000000){
-    return (ohmy / 1000000).toFixed(2).replace(/\.00$/,"") + " MΩ";
-  }
-  if(ohmy >= 1000){
-    return (ohmy / 1000).toFixed(2).replace(/\.00$/,"") + " kΩ";
-  }
-  return ohmy + " Ω";
-}
-
-function initRezystor(rezystorId, typ, wynikId){
-  const cyfryPaski = document.querySelectorAll(`#${rezystorId} .cyfry .pasek`);
-  const mnoznikPaski = document.querySelectorAll(`#${rezystorId} .mnoznik .pasek`);
-  const tolerancjaPaski = document.querySelectorAll(`#${rezystorId} .tolerancja .pasek`);
-  const wszystkiePaski = [...cyfryPaski, ...mnoznikPaski, ...tolerancjaPaski];
-
-  wszystkiePaski.forEach(pasek=>{
-    pasek.style.background="#000000";
-
-    pasek.addEventListener("click",(e)=>{
-      aktywnyPasek=pasek;
-
-      // sprawdz czy to tolerancja
-      if(tolerancjaPaski.includes(pasek)){
-        ustawMenu(koloryTolerancji);
-      } else {
-        ustawMenu(wszystkieKolory);
-      }
-
-      menu.style.display="block";
-      menu.style.left=e.pageX+"px";
-      menu.style.top=e.pageY+"px";
-    });
-  });
-
-  function oblicz() {
-    let wartosc, tolerancjaStr="", tolerancjaProc=0;
-
-    if(typ==="5") {
-      const b1=cyfry[hex(cyfryPaski[0].style.background)] || 0;
-      const b2=cyfry[hex(cyfryPaski[1].style.background)] || 0;
-      const b3=cyfry[hex(cyfryPaski[2].style.background)] || 0;
-      const mnoznik=mnozniki[hex(mnoznikPaski[0].style.background)] || 1;
-
-      tolerancjaStr = tolerancje[hex(tolerancjaPaski[0].style.background)] || "";
-      wartosc = ((b1*100)+(b2*10)+b3)*mnoznik;
-
-    } else { 
-      const b1=cyfry[hex(cyfryPaski[0].style.background)] || 0;
-      const b2=cyfry[hex(cyfryPaski[1].style.background)] || 0;
-      const mnoznik=mnozniki[hex(mnoznikPaski[0].style.background)] || 1;
-
-      tolerancjaStr = tolerancje[hex(tolerancjaPaski[0].style.background)] || "";
-      wartosc = (b1*10 + b2)*mnoznik;
-    }
-
-    if(tolerancjaStr){
-      tolerancjaProc = parseFloat(tolerancjaStr.replace("±","").replace("%","")) / 100;
-    }
-
-    let min = wartosc;
-    let max = wartosc;
-
-    if(tolerancjaProc){
-      min = wartosc * (1 - tolerancjaProc);
-      max = wartosc * (1 + tolerancjaProc);
-    }
-
-    document.getElementById(wynikId).innerText =
-      `Rezystancja ${typ}-paskowego: ${formatujOhmy(wartosc)} ${tolerancjaStr} (${formatujOhmy(Math.round(min))} – ${formatujOhmy(Math.round(max))})`;
-  }
-
-  menu.addEventListener("change", ()=>{
-    if(aktywnyPasek){
-      aktywnyPasek.style.background=menu.value;
-      menu.style.display="none";
-      oblicz();
-    }
-  });
+function formatujOhmy(v){
+  if(v>=1e6) return (v/1e6).toFixed(2).replace(/\.00$/,"")+" MΩ";
+  if(v>=1e3) return (v/1e3).toFixed(2).replace(/\.00$/,"")+" kΩ";
+  return v+" Ω";
 }
 
 function hex(rgb){
   if(rgb.startsWith("#")) return rgb.toLowerCase();
   const r=rgb.match(/\d+/g);
-  if(!r) return "#000000";
-  return "#"+((1<<24)+(parseInt(r[0])<<16)+(parseInt(r[1])<<8)+parseInt(r[2])).toString(16).slice(1);
+  return "#"+((1<<24)+(r[0]<<16)+(r[1]<<8)+(+r[2])).toString(16).slice(1);
 }
 
-initRezystor("rezystor5","5","wynik5");
-initRezystor("rezystor4","4","wynik4");
-</script>
+// --- inicjalizacja ---
+function init(rezId, typ, wynikId){
+  const cyf = document.querySelectorAll(`#${rezId} .cyfry .pasek`);
+  const mnoz = document.querySelector(`#${rezId} .mnoznik .pasek`);
+  const tol = document.querySelector(`#${rezId} .tolerancja .pasek`);
 
+  function oblicz(){
+    let val, tolStr="", p=0;
+
+    if(typ==="5"){
+      val=((cyfry[hex(cyf[0].style.background)]||0)*100+
+           (cyfry[hex(cyf[1].style.background)]||0)*10+
+           (cyfry[hex(cyf[2].style.background)]||0))*
+           (mnozniki[hex(mnoz.style.background)]||1);
+    }else{
+      val=((cyfry[hex(cyf[0].style.background)]||0)*10+
+           (cyfry[hex(cyf[1].style.background)]||0))*
+           (mnozniki[hex(mnoz.style.background)]||1);
+    }
+
+    tolStr=tolerancje[hex(tol.style.background)]||"";
+    if(tolStr) p=parseFloat(tolStr.replace("±",""))/100;
+
+    const min=Math.round(val*(1-p));
+    const max=Math.round(val*(1+p));
+
+    document.getElementById(wynikId).innerText=
+      `${formatujOhmy(val)} ${tolStr} (${formatujOhmy(min)} – ${formatujOhmy(max)})`;
+  }
+
+  [...cyf, mnoz, tol].forEach(p=>{
+    p.style.background="#000000";
+
+    p.onclick=(e)=>{
+      aktywnyPasek=p;
+      aktualnaFunkcjaOblicz=oblicz;
+
+      if(p===tol) ustawMenu(koloryTolerancji);
+      else ustawMenu(wszystkieKolory);
+
+      menu.style.display="block";
+      menu.style.left=e.pageX+"px";
+      menu.style.top=e.pageY+"px";
+    };
+  });
+}
+
+
+menu.addEventListener("change", ()=>{
+  if(aktywnyPasek){
+    aktywnyPasek.style.background=menu.value;
+    menu.style.display="none";
+    if(aktualnaFunkcjaOblicz) aktualnaFunkcjaOblicz();
+  }
+});
+
+// start
+init("rezystor5","5","wynik5");
+init("rezystor4","4","wynik4");
+
+</script>
 </body>
 </html>
