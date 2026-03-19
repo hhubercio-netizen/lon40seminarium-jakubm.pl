@@ -127,20 +127,7 @@ select{
   <div id="wynik4">Rezystancja 4-paskowego: -</div>
 </div>
 
-<select id="menuKolorow">
-  <option value="#000000">Czarny</option>
-  <option value="#8B4513">Brązowy</option>
-  <option value="#FF0000">Czerwony</option>
-  <option value="#FFA500">Pomarańczowy</option>
-  <option value="#FFFF00">Żółty</option>
-  <option value="#008000">Zielony</option>
-  <option value="#0000FF">Niebieski</option>
-  <option value="#800080">Fioletowy</option>
-  <option value="#808080">Szary</option>
-  <option value="#FFFFFF">Biały</option>
-  <option value="#FFD700">Złoty</option>
-  <option value="#C0C0C0">Srebrny</option>
-</select>
+<select id="menuKolorow"></select>
 
 <script>
 const cyfry = {
@@ -157,8 +144,53 @@ const tolerancje = {
   "#8b4513":"±1%", "#ff0000":"±2%", "#ffd700":"±5%", "#c0c0c0":"±10%"
 };
 
+// wszystkie kolory
+const wszystkieKolory = [
+  ["#000000","Czarny"],
+  ["#8B4513","Brązowy"],
+  ["#FF0000","Czerwony"],
+  ["#FFA500","Pomarańczowy"],
+  ["#FFFF00","Żółty"],
+  ["#008000","Zielony"],
+  ["#0000FF","Niebieski"],
+  ["#800080","Fioletowy"],
+  ["#808080","Szary"],
+  ["#FFFFFF","Biały"],
+  ["#FFD700","Złoty"],
+  ["#C0C0C0","Srebrny"]
+];
+
+// tylko tolerancje
+const koloryTolerancji = [
+  ["#8B4513","Brązowy"],
+  ["#FF0000","Czerwony"],
+  ["#FFD700","Złoty"],
+  ["#C0C0C0","Srebrny"]
+];
+
 let aktywnyPasek = null;
+let trybTolerancji = false;
 const menu = document.getElementById("menuKolorow");
+
+function ustawMenu(lista){
+  menu.innerHTML="";
+  lista.forEach(k=>{
+    const opt=document.createElement("option");
+    opt.value=k[0];
+    opt.textContent=k[1];
+    menu.appendChild(opt);
+  });
+}
+
+function formatujOhmy(ohmy){
+  if(ohmy >= 1000000){
+    return (ohmy / 1000000).toFixed(2).replace(/\.00$/,"") + " MΩ";
+  }
+  if(ohmy >= 1000){
+    return (ohmy / 1000).toFixed(2).replace(/\.00$/,"") + " kΩ";
+  }
+  return ohmy + " Ω";
+}
 
 function initRezystor(rezystorId, typ, wynikId){
   const cyfryPaski = document.querySelectorAll(`#${rezystorId} .cyfry .pasek`);
@@ -168,8 +200,17 @@ function initRezystor(rezystorId, typ, wynikId){
 
   wszystkiePaski.forEach(pasek=>{
     pasek.style.background="#000000";
+
     pasek.addEventListener("click",(e)=>{
       aktywnyPasek=pasek;
+
+      // sprawdz czy to tolerancja
+      if(tolerancjaPaski.includes(pasek)){
+        ustawMenu(koloryTolerancji);
+      } else {
+        ustawMenu(wszystkieKolory);
+      }
+
       menu.style.display="block";
       menu.style.left=e.pageX+"px";
       menu.style.top=e.pageY+"px";
@@ -210,7 +251,7 @@ function initRezystor(rezystorId, typ, wynikId){
     }
 
     document.getElementById(wynikId).innerText =
-      `Rezystancja ${typ}-paskowego: ${wartosc} Ω ${tolerancjaStr} (${Math.round(min)} Ω – ${Math.round(max)} Ω)`;
+      `Rezystancja ${typ}-paskowego: ${formatujOhmy(wartosc)} ${tolerancjaStr} (${formatujOhmy(Math.round(min))} – ${formatujOhmy(Math.round(max))})`;
   }
 
   menu.addEventListener("change", ()=>{
