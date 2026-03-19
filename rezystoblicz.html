@@ -11,11 +11,15 @@ body{
   background:#f2f2f2;
 }
 
+.rezystor-container{
+  margin:60px auto;
+}
+
 .rezystor{
   display:flex;
   align-items:center;
   justify-content:center;
-  margin:60px auto;
+  margin-top:20px;
 }
 
 .przewod{
@@ -36,11 +40,17 @@ body{
 
 .korpus .cyfry{
   display:flex;
-  gap:10px; /* odstęp między cyframi */
+  gap:5px; /* mały odstęp między cyframi */
 }
 
-.korpus .mnoznik, .korpus .tolerancja{
-  margin-left:20px; /* większy odstęp od cyfr */
+.korpus .mnoznik{
+  display:flex;
+  margin-left:5px; /* mała przerwa od cyfr */
+}
+
+.korpus .tolerancja{
+  display:flex;
+  margin-left:15px; /* większa przerwa od mnożnika, żeby oddzielić tolerancję */
 }
 
 .pasek{
@@ -54,6 +64,11 @@ body{
   margin-top:20px;
   font-size:20px;
   font-weight:bold;
+}
+
+img{
+  max-width:400px;
+  margin-bottom:10px;
 }
 
 select{
@@ -70,43 +85,49 @@ select{
 <p>Kliknij pasek aby wybrać kolor</p>
 
 <!-- REZYSTOR 5-PASKOWY -->
-<div class="rezystor" id="rezystor5">
-  <div class="przewod"></div>
-  <div class="korpus">
-    <div class="cyfry">
-      <div class="pasek"></div>
-      <div class="pasek"></div>
-      <div class="pasek"></div>
+<div class="rezystor-container">
+  <img src="a4677c4d-4767-42e7-9228-5503c3d9f29d.png" alt="5-paskowy rezystor">
+  <div class="rezystor" id="rezystor5">
+    <div class="przewod"></div>
+    <div class="korpus">
+      <div class="cyfry">
+        <div class="pasek"></div>
+        <div class="pasek"></div>
+        <div class="pasek"></div>
+      </div>
+      <div class="mnoznik">
+        <div class="pasek"></div>
+      </div>
+      <div class="tolerancja">
+        <div class="pasek"></div>
+      </div>
     </div>
-    <div class="mnoznik">
-      <div class="pasek"></div>
-    </div>
-    <div class="tolerancja">
-      <div class="pasek"></div>
-    </div>
+    <div class="przewod"></div>
   </div>
-  <div class="przewod"></div>
+  <div id="wynik5">Rezystancja 5-paskowego: -</div>
 </div>
-<div id="wynik5">Rezystancja 5-paskowego: -</div>
 
 <!-- REZYSTOR 4-PASKOWY -->
-<div class="rezystor" id="rezystor4">
-  <div class="przewod"></div>
-  <div class="korpus">
-    <div class="cyfry">
-      <div class="pasek"></div>
-      <div class="pasek"></div>
+<div class="rezystor-container">
+  <img src="f7ce8648-f2bc-473c-9bc4-62ee70eba5f5.png" alt="4-paskowy rezystor">
+  <div class="rezystor" id="rezystor4">
+    <div class="przewod"></div>
+    <div class="korpus">
+      <div class="cyfry">
+        <div class="pasek"></div>
+        <div class="pasek"></div>
+      </div>
+      <div class="mnoznik">
+        <div class="pasek"></div>
+      </div>
+      <div class="tolerancja">
+        <div class="pasek"></div>
+      </div>
     </div>
-    <div class="mnoznik">
-      <div class="pasek"></div>
-    </div>
-    <div class="tolerancja">
-      <div class="pasek"></div>
-    </div>
+    <div class="przewod"></div>
   </div>
-  <div class="przewod"></div>
+  <div id="wynik4">Rezystancja 4-paskowego: -</div>
 </div>
-<div id="wynik4">Rezystancja 4-paskowego: -</div>
 
 <select id="menuKolorow">
   <option value="#000000">Czarny</option>
@@ -134,7 +155,6 @@ const mnozniki = {
   "#008000":100000, "#0000ff":1000000, "#ffd700":0.1, "#c0c0c0":0.01
 };
 
-// 4 paski tolerancji: brąz ±1%, czerwony ±2%, złoty ±5%, srebrny ±10%
 const tolerancje = {
   "#8b4513":"±1%", "#ff0000":"±2%", "#ffd700":"±5%", "#c0c0c0":"±10%"
 };
@@ -142,7 +162,6 @@ const tolerancje = {
 let aktywnyPasek = null;
 const menu = document.getElementById("menuKolorow");
 
-// Funkcja do inicjalizacji pasków dla dowolnego rezystora
 function initRezystor(rezystorId, typ="5", wynikId){
   const cyfryPaski = document.querySelectorAll(`#${rezystorId} .cyfry .pasek`);
   const mnoznikPaski = document.querySelectorAll(`#${rezystorId} .mnoznik .pasek`);
@@ -168,7 +187,7 @@ function initRezystor(rezystorId, typ="5", wynikId){
       const mnoznik=mnozniki[hex(mnoznikPaski[0].style.background)] || 1;
       tolerancjaStr = tolerancje[hex(tolerancjaPaski[0].style.background)] || "";
       wartosc = ((b1*100)+(b2*10)+b3)*mnoznik;
-    } else { // 4 paski
+    } else { 
       const b1=cyfry[hex(cyfryPaski[0].style.background)] || 0;
       const b2=cyfry[hex(cyfryPaski[1].style.background)] || 0;
       const mnoznik=mnozniki[hex(mnoznikPaski[0].style.background)] || 1;
@@ -188,7 +207,6 @@ function initRezystor(rezystorId, typ="5", wynikId){
   });
 }
 
-// Konwersja rgb -> hex
 function hex(rgb){
   if(rgb.startsWith("#")) return rgb.toLowerCase();
   const r=rgb.match(/\d+/g);
@@ -196,7 +214,6 @@ function hex(rgb){
   return "#"+((1<<24)+(parseInt(r[0])<<16)+(parseInt(r[1])<<8)+parseInt(r[2])).toString(16).slice(1);
 }
 
-// Inicjalizacja obu rezystorów z własnymi wynikami
 initRezystor("rezystor5","5","wynik5");
 initRezystor("rezystor4","4","wynik4");
 </script>
