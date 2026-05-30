@@ -1,3 +1,8 @@
+<?php
+    include("Database.php");
+?>
+
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
