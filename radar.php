@@ -1,5 +1,19 @@
 <?php
     include("Database.php");
+
+    function dodacuser($user,$pass){
+        $sql = "INSERT INTO users (user ,password)
+            VALUES ('$user','$pass')";
+        try{
+            mysqli_query($conn, $sql);
+            echo"User is registered";
+        }
+        catch(mysqli_sql_exception){
+            echo"could not registerd user";
+    }
+    }
+
+    mysqli_close($conn);
 ?>
 
 
@@ -24,7 +38,7 @@
             <h4>Prędkość</h4>
             <input id="predkosc">
             <h4>Wyślij do bazy :</h4>
-            <button onclick="sendData()">Submit</button>
+            <button onclick="()">Submit</button>
         </fieldset>
     </section>
 </body>
